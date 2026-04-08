@@ -10,15 +10,18 @@ from sqlalchemy.exc import IntegrityError
 @app.route('/api/products', methods=['POST'])
 def create_product():
     data = request.get_json()
+
     # Validate required fields
     required_fields = ['name', 'sku', 'price']
     for field in required_fields:
         if field not in data:
             return {"error": f"{field} is required"}, 400
+
     try:
         price = Decimal(str(data['price']))
     except:
         return {"error": "Invalid price format"}, 400
+
     try:
         # Start transaction
         product = Product(
@@ -26,8 +29,10 @@ def create_product():
             sku=data['sku'],
             price=price
         )
+
         db.session.add(product)
         db.session.flush()  # Get product.id before commit
+
         # Optional inventory creation
         if 'warehouse_id' in data and 'initial_quantity' in data:
             inventory = Inventory(
@@ -36,14 +41,18 @@ def create_product():
                 quantity=data.get('initial_quantity', 0)
             )
             db.session.add(inventory)
+
         db.session.commit()
+
         return {
             "message": "Product created",
             "product_id": product.id
         }, 201
+
     except IntegrityError:
         db.session.rollback()
         return {"error": "SKU must be unique"}, 400
+
     except Exception as e:
         db.session.rollback()
         return {"error": "Internal server error"}, 500
