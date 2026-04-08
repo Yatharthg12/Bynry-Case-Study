@@ -1,6 +1,6 @@
 # Bynry-Case-Study
 
---
+Solution to the following case study problem given below.
 
 ## Problem Statement
 
